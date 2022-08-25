@@ -1,6 +1,6 @@
 const express = require('express');
 const routerAPI = require('./routes/index');
-
+const cors = require('cors');
 const {
   loggingErrors,
   errorHandler,
@@ -12,6 +12,18 @@ const PORT = 3000;
 
 app.use(express.json());
 
+const whiteList = ['http://localhost:8080', 'http://myapp.com'];
+const options = {
+  origin: (origin, callback) => {
+    if (whiteList.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Access Denied'), false);
+    }
+  },
+};
+
+app.use(cors(options));
 app.get('/', (req, res) => {
   res.send('Hi, this is my server in Express');
 });
