@@ -42,6 +42,4 @@ app.use(loggingErrors);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log('Listening on Port: ' + PORT);
-});
+app.listen(PORT);
