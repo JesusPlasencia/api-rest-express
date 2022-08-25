@@ -1,6 +1,16 @@
 const express = require('express');
+const routerAPI = require('./routes/index');
+
+const {
+  loggingErrors,
+  errorHandler,
+  boomErrorHandler,
+} = require('./middlewares/error.handler');
+
 const app = express();
 const PORT = 3000;
+
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Hi, this is my server in Express');
@@ -14,29 +24,11 @@ app.get('/new-route', (req, res) => {
   res.send('Hi, this is a new endpoint.');
 });
 
-app.get('/products', (req, res) => {
-  res.json({
-    name: 'Hi, this is the page of the products.',
-    price: 1000,
-  });
-});
+routerAPI(app);
 
-app.get('/categories', (req, res) => {
-  res.json([
-    {
-      id: 'C00001',
-      name: 'Television',
-    },
-    {
-      id: 'C00002',
-      name: 'Videogames',
-    },
-    {
-      id: 'C00003',
-      name: 'Laptops',
-    },
-  ]);
-});
+app.use(loggingErrors);
+app.use(boomErrorHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log('Listening on Port: ' + PORT);
