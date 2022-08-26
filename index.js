@@ -6,6 +6,7 @@ const {
   errorHandler,
   boomErrorHandler,
 } = require('./middlewares/error.handler');
+const { sqlErrorHandler } = require('./middlewares/sql.handler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +41,7 @@ routerAPI(app);
 
 app.use(loggingErrors);
 app.use(boomErrorHandler);
+app.use(sqlErrorHandler);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
