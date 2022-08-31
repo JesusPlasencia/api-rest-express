@@ -1,96 +1,43 @@
 const boom = require('@hapi/boom');
-const faker = require('faker');
 const { sequelize } = require('../libs/sequelize');
 
 class ProductService {
-  constructor() {
-    this.products = [];
-    this.generate();
-    //this.pool = pool;
-    // this.pool.on('error', (err, next) => {
-    //   next(err);
-    // });
-  }
-
-  generate() {
-    //
-    const limit = 10;
-    for (let index = 0; index < limit; index++) {
-      this.products.push({
-        id: faker.datatype.uuid(),
-        name: faker.commerce.productName(),
-        price: parseFloat(faker.commerce.price(), 10),
-        image: faker.image.imageUrl(),
-        isBlock: faker.datatype.boolean(),
-      });
-    }
-    return this.products;
-  }
+  constructor() {}
 
   async create(data) {
     //
-    const newProduct = {
-      id: faker.datatype.uuid(),
-      ...data,
-    };
-    this.products.push(newProduct);
+    const newProduct = await sequelize.models.Product.create(data);
     return newProduct;
   }
 
   async find() {
     //
-    const query = 'Select * From tasks';
-    const [products] = await sequelize.query(query);
-    if (products.length == 0) {
-      throw boom.notFound('Products Not Found');
-    }
+    const products = await sequelize.models.Product.findAll({
+      include: ['category'],
+    });
     return products;
   }
 
   async findOne(id) {
-    //
-    const product = this.products.find((item) => item.id === id);
-    if (!product) {
+    const foundProduct = await sequelize.models.Product.findByPk(id);
+    if (!foundProduct) {
       throw boom.notFound('Product Not Found');
     }
-    if (product.isBlock) {
-      throw boom.conflict('Product is blocked');
-    }
-    return product;
+    return foundProduct;
   }
 
-  async update(id, data) {
-    //
-    const index = this.products.findIndex((item) => item.id === id);
-    if (index === -1) {
-      throw boom.notFound('Product Not Found');
-    }
-    const product = this.products[index];
-    if (product.isBlock) {
-      throw boom.conflict('Product is blocked');
-    }
-    this.products[index] = {
-      ...product,
-      ...data,
-    };
-    return this.products[index];
+  async update(id, changes) {
+    const foundProduct = await this.findOne(id);
+    const rta = await foundProduct.update(changes);
+    return rta;
   }
 
   async delete(id) {
-    //validating existence
-    const index = this.products.findIndex((item) => item.id === id);
-    if (index === -1) {
-      throw boom.notFound('Product Not Found');
-    }
-    //validating lock
-    const product = this.products[index];
-    if (product.isBlock) {
-      throw boom.conflict('Product is blocked');
-    }
-    //removing from initial array
-    this.products.splice(index, 1);
-    //showing the id of the removed product
-    return { id };
+    const foundProduct = await this.findOne(id);
+    await foundProduct.destroy();
+    return {
+      id,
+    };
   }
 }
 

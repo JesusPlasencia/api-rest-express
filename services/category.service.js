@@ -1,23 +1,41 @@
 const boom = require('@hapi/boom');
-const pool = require('../libs/postgres.pool');
+const { sequelize } = require('../libs/sequelize');
 
 class CategoryService {
-  constructor() {
-    this.categories = [];
-    this.pool = pool;
-    this.pool.on('error', (err) => {
-      console.error('MESSAGE: ' + err.message);
-    });
+  constructor() {}
+
+  async create(data) {
+    const newCategory = await sequelize.models.Category.create(data);
+    return newCategory;
   }
 
   async find() {
-    //
-    const query = 'Select * From tasks';
-    const categories = await pool.query(query);
-    if (categories.rows.length === 0) {
-      throw boom.notFound('Categories Not Found');
+    const categories = await sequelize.models.Category.findAll();
+    return categories;
+  }
+
+  async findOne(id) {
+    const foundCategory = await sequelize.models.Category.findByPk(id, {
+      include: ['products'],
+    });
+    if (!foundCategory) {
+      throw boom.notFound('Category Not Found');
     }
-    return categories.rows;
+    return foundCategory;
+  }
+
+  async update(id, changes) {
+    const foundCategory = await this.findOne(id);
+    const rta = await foundCategory.update(changes);
+    return rta;
+  }
+
+  async delete(id) {
+    const foundCategory = await this.findOne(id);
+    await foundCategory.destroy();
+    return {
+      id,
+    };
   }
 }
 

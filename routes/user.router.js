@@ -37,7 +37,7 @@ router.post(
     try {
       const body = req.body;
       const newUser = await service.create(body);
-      res.json(newUser);
+      res.status(201).json(newUser);
     } catch (err) {
       next(err);
     }
