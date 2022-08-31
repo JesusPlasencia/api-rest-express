@@ -19,7 +19,7 @@ class OrderService {
       include: [
         {
           association: 'customer',
-          include: ['user'],
+          // include: ['user'],
         },
         'items',
       ],
