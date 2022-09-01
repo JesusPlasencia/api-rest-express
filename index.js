@@ -7,6 +7,7 @@ const {
   boomErrorHandler,
 } = require('./middlewares/error.handler');
 const { sqlErrorHandler } = require('./middlewares/sql.handler');
+const { checkAPIKey } = require('./middlewares/auth.handler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,7 +34,7 @@ app.get('/home', (req, res) => {
   res.send('<h1>Hello, World</h1>');
 });
 
-app.get('/new-route', (req, res) => {
+app.get('/new-route', checkAPIKey, (req, res) => {
   res.send('Hi, this is a new endpoint.');
 });
 
