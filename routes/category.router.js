@@ -15,18 +15,13 @@ const router = express.Router();
 
 const service = new CategoryService();
 
-router.get(
-  '/',
-  checkRoles(['Admin', 'Customer', 'Seller']),
-  async (req, res) => {
-    const users = await service.find();
-    res.json(users);
-  }
-);
+router.get('/', async (req, res) => {
+  const users = await service.find();
+  res.json(users);
+});
 
 router.get(
   '/:id',
-  checkRoles(['Admin', 'Customer', 'Seller']),
   validatorHandler(getCategorySchema, 'params'),
   async (req, res, next) => {
     try {

@@ -5,7 +5,18 @@ class OrderService {
   constructor() {}
 
   async create(data) {
-    const newOrder = await sequelize.models.Order.create(data);
+    const foundCustomer = await sequelize.models.Customer.findOne({
+      where: {
+        userId: data.userId,
+      },
+    });
+    if (!foundCustomer) {
+      throw boom.notFound('Customer Not Found');
+    }
+    const newOrder = await sequelize.models.Order.create({
+      ...data,
+      customerId: foundCustomer.id,
+    });
     return newOrder;
   }
 
@@ -28,6 +39,30 @@ class OrderService {
       throw boom.notFound('Order Not Found');
     }
     return foundOrder;
+  }
+
+  async findOrdersByUser(id) {
+    // Finding an specific customer by userId
+    const customer = await sequelize.models.Customer.findOne({
+      where: {
+        userId: id,
+      },
+    });
+    if (!customer) {
+      throw boom.notFound('Customer Not Found');
+    }
+    const customerId = await customer.id;
+    // Finding an specific orders by customerId
+    const orders = await sequelize.models.Order.findAll({
+      where: {
+        customerId,
+      },
+      include: ['items'],
+    });
+    if (!orders) {
+      throw boom.notFound('Orders Not Found');
+    }
+    return orders;
   }
 
   async update(id, changes) {

@@ -17,7 +17,9 @@ class CustomerService {
   }
 
   async findOne(id) {
-    const foundCustomer = await sequelize.models.Customer.findByPk(id);
+    const foundCustomer = await sequelize.models.Customer.findByPk(id, {
+      include: ['user'],
+    });
     if (!foundCustomer) {
       throw boom.notFound('Customer Not Found');
     }
