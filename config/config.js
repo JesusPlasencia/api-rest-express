@@ -12,6 +12,7 @@ const config = {
   dbUrl: process.env.DATABASE_URL,
   apiKey: process.env.API_KEY,
   apiSecret: process.env.API_SECRET,
+  apiSecretRecovery: process.env.API_SECRET_RESET,
   userGmail: process.env.USER_GMAIL,
   passGmail: process.env.PASS_GMAIL,
 };

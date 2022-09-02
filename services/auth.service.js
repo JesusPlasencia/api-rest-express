@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 
 const { config } = require('../config/config');
 const { sequelize } = require('../libs/sequelize');
+
 //User Services
 const UserService = require('./user.service');
 const service = new UserService();
@@ -53,10 +54,11 @@ class AuthService {
     }
     ///
     const payload = { id: user.id };
-    const token = jwt.sign(payload, config.apiSecret, {
+    const token = jwt.sign(payload, config.apiSecretRecovery, {
       expiresIn: '15min',
     });
     const link = `http://localhost:3000/recovery?token=${token}`;
+    await service.update(user.id, { recoveryToken: token });
     ///
     const mail = {
       from: config.userGmail, // sender address
@@ -85,6 +87,29 @@ class AuthService {
     await transporter.sendMail(infoMail);
     //
     return { message: 'Message sent' };
+  }
+
+  async changePassword(token, newPassword) {
+    //
+    try {
+      //
+      console.log(token);
+      const payload = jwt.verify(token, config.apiSecretRecovery);
+      console.log(`PAYLOAD: ${payload.id}`);
+      const user = await service.findOne(payload.id);
+      console.log(`USER: ${user}`);
+      if (user.recoveryToken !== token) {
+        throw boom.unauthorized();
+      }
+      const passHash = await bcrypt.hash(newPassword, 10);
+      await service.update(user.id, {
+        recoveryToken: null,
+        password: passHash,
+      });
+      return { message: 'Password changed successfully' };
+    } catch (err) {
+      throw boom.unauthorized();
+    }
   }
 }
 
